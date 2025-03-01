@@ -1,0 +1,100 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Varela", sans-serif;
+}
+
+/* Dark background */
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
+    color: white;
+}
+
+/* Login & Register container */
+.login-container, .register-container {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    width: 350px;
+}
+
+/* Heading */
+h2 {
+    margin-bottom: 15px;
+    color: #f0f0f0;
+    font-size: 22px;
+}
+
+/* Input fields */
+input, select {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    outline: none;
+}
+
+/* Placeholder color */
+input::placeholder, select {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Stylish Dropdown */
+select {
+    appearance: none;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.15) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path fill="white" d="M7 10l5 5 5-5z"/></svg>') no-repeat right 12px center;
+    background-size: 18px;
+    padding-right: 40px;
+}
+
+/* Gradient Button */
+button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    background: linear-gradient(135deg, #ff416c, #ff4b2b);
+    color: white;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+/* Button Hover Effect */
+button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(255, 65, 108, 0.5);
+}
+
+/* Register/Login Link */
+p {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+p a {
+    color: #ff416c;
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+p a:hover {
+    text-decoration: underline;
+    color: #ff4b2b;
+}
