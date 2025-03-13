@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='user.css') }}">
+    <script defer src="{{ url_for('static', filename='user.js') }}"></script>
+</head>
+<body>
+
+    <div class="user-container">
+        <h1>User Details</h1>
+        <p><strong>Name:</strong> {{ user[0] }}</p>
+        <p><strong>Email:</strong> {{ user[1] }}</p>
+        <p><strong>Username:</strong> {{ user[2] }}</p>
+
+        <button id="list-company-btn">List a Company</button>
+
+        <h2>Existing Startups</h2>
+        <ul>
+            {% for startup in startups %}
+                <li><strong>{{ startup[1] }}</strong> - {{ startup[2] }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Popup Form for Listing a Company -->
+    <div id="popup-form" class="popup">
+        <div class="popup-content">
+            <span class="close">&times;</span>
+            <h2>List a New Company</h2>
+            <form id="company-form" method="POST" action="{{ url_for('list_company') }}">
+                <label>Startup Name:</label>
+                <input type="text" name="startup_name" required>
+
+                <label>Description:</label>
+                <textarea name="description" required></textarea>
+
+                <label>Funding Goal:</label>
+                <input type="number" name="funding_goal" required>
+
+                <label>Current Funding:</label>
+                <input type="number" name="current_funding">
+
+                <label>Sector:</label>
+                <input type="text" name="sector" required>
+
+                <label>Founder Info:</label>
+                <input type="text" name="founder_info" required>
+
+                <label>Team Details:</label>
+                <input type="text" name="team_details">
+
+                <button type="submit">List Company</button>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>

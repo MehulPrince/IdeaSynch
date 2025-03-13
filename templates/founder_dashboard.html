@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Founder Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='founder_dashboard.css') }}">
+    <script defer src="{{ url_for('static', filename='founder_dashboard.js') }}"></script>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <button id="toggle-sidebar">➤</button>
+        <ul>
+            <li><a href="{{ url_for('dashboard') }}">Home</a></li>
+            <li><a href="{{ url_for('user') }}" id="user-tab">User</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1>Welcome, {{ user[0] }}!</h1>
+
+        <!-- List Startups -->
+        <section class="startup-list">
+            {% for startup in startups %}
+            <div class="startup-card">
+                <h2>{{ startup[1] }}</h2>
+                <p>{{ startup[2] }}</p>
+                <p><strong>Funding Goal:</strong> ${{ startup[3] }}</p>
+                <p><strong>Current Funding:</strong> ${{ startup[4] }}</p>
+                <button class="more-details" data-id="{{ startup[0] }}">More Details</button>
+                <button class="connect">Connect</button>
+            </div>
+            {% endfor %}
+        </section>
+    </div>
+
+    <!-- Company Listing Popup -->
+    <div id="company-popup" class="popup">
+        <div class="popup-content">
+            <span class="close-btn">&times;</span>
+            <h2>List Your Company</h2>
+            <form id="company-form">
+                <label>Company Name:</label>
+                <input type="text" id="company-name" required>
+                
+                <label>Description:</label>
+                <textarea id="company-description" required></textarea>
+
+                <label>Sector:</label>
+                <input type="text" id="company-sector" required>
+
+                <label>Funding Required ($):</label>
+                <input type="number" id="funding-required" required>
+
+                <label>Founder Details:</label>
+                <textarea id="founder-details" required></textarea>
+
+                <label>Education/Credentials:</label>
+                <textarea id="education" required></textarea>
+
+                <label>Existing Funding Acquired (if any):</label>
+                <input type="number" id="existing-funding">
+
+                <button type="submit">List Company</button>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>
