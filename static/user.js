@@ -1,15 +1,15 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const listCompanyBtn = document.getElementById("list-company-btn");
-    const popupForm = document.getElementById("popup-form");
-    const closeBtn = document.querySelector(".close");
+    const listCompanyBtn = document.getElementById("openListCompanyPopup"); // Match ID from HTML
+    const popupForm = document.getElementById("listCompanyPopup"); // Match ID from HTML
+    const closeBtn = document.getElementById("closePopup"); // Ensure this ID exists in HTML
 
     // Show popup when "List Company" button is clicked
-    listCompanyBtn.addEventListener("click", function () {
+    listCompanyBtn?.addEventListener("click", function () {
         popupForm.style.display = "flex";
     });
 
     // Close popup when "X" is clicked
-    closeBtn.addEventListener("click", function () {
+    closeBtn?.addEventListener("click", function () {
         popupForm.style.display = "none";
     });
 

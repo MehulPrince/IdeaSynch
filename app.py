@@ -13,6 +13,11 @@ conn = psycopg2.connect(
     host="localhost"
 )
 
+@app.route('/')
+def landing():
+    return render_template('landing.html')
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
