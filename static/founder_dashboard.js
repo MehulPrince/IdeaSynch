@@ -1,62 +1,67 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const sidebar = document.querySelector(".sidebar");
-    const toggleBtn = document.getElementById("toggle-sidebar");
-    const userTab = document.getElementById("user-tab");
-    const popup = document.getElementById("company-popup");
-    const closeBtn = document.querySelector(".close-btn");
-    const companyForm = document.getElementById("company-form");
+    // Modal functionality
+    const modal = document.getElementById('company-modal');
+    const openModalBtn = document.getElementById('list-company-btn');
+    const closeModalBtn = document.querySelector('.modal-close');
+    const cancelBtn = document.querySelector('.cancel-btn');
+    const toast = document.getElementById('toast');
 
-    // Sidebar Toggle
-    toggleBtn.addEventListener("click", function () {
-        sidebar.classList.toggle("show");
-        if (sidebar.classList.contains("show")) {
-            toggleBtn.innerHTML = "←"; // Change icon
-        } else {
-            toggleBtn.innerHTML = "➤";
+    // Open modal
+    openModalBtn.addEventListener('click', () => {
+        modal.classList.add('show');
+    });
+
+    // Close modal
+    closeModalBtn.addEventListener('click', () => {
+        modal.classList.remove('show');
+    });
+
+    // Close modal with cancel button
+    cancelBtn.addEventListener('click', () => {
+        modal.classList.remove('show');
+    });
+
+    // Close modal when clicking outside
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.remove('show');
         }
     });
 
-    // Open User Page
-    userTab.addEventListener("click", function (event) {
-        event.preventDefault();
-        window.location.href = "/user"; // Redirect to user page
+    // Show toast notification
+    function showToast(title, message) {
+        document.querySelector('.toast-title').textContent = title;
+        document.querySelector('.toast-message').textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+
+    // Handle form submission
+    document.getElementById('company-form').addEventListener('submit', function (e) {
+        showToast('Company Listed', 'Your company has been successfully listed.');
     });
 
-    // Open Popup
-    document.querySelector(".list-company").addEventListener("click", function () {
-        popup.style.display = "block";
+    // Connect button functionality
+    document.querySelectorAll('.connect-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            showToast('Connection Request', 'Your connection request has been sent.');
+        });
     });
 
-    // Close Popup
-    closeBtn.addEventListener("click", function () {
-        popup.style.display = "none";
+    // Details button functionality
+    document.querySelectorAll('.details-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            showToast('Startup Details', 'Viewing details for this startup.');
+        });
     });
 
-    // Handle Company Form Submission
-    companyForm.addEventListener("submit", function (event) {
-        event.preventDefault();
-
-        const data = {
-            name: document.getElementById("company-name").value,
-            description: document.getElementById("company-description").value,
-            sector: document.getElementById("company-sector").value,
-            funding_required: document.getElementById("funding-required").value,
-            founder_details: document.getElementById("founder-details").value,
-            education: document.getElementById("education").value,
-            existing_funding: document.getElementById("existing-funding").value
-        };
-
-        fetch("/list_company", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(result => {
-            alert(result.message);
-            popup.style.display = "none";
-            location.reload(); // Refresh to show the new company
-        })
-        .catch(error => console.error("Error:", error));
+    // Logout functionality
+    document.getElementById('logout-btn').addEventListener('click', () => {
+        showToast('Logged out', 'You have been successfully logged out.');
+        setTimeout(() => {
+            window.location.href = '/login';
+        }, 1000);
     });
 });

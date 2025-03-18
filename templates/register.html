@@ -1,28 +1,28 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Register - IdeaSync</title>
-  <<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
 </head>
 <body>
   <div class="auth-container">
     <div class="auth-card">
       <div class="auth-header">
-        <a href="/login" class="logo">
+        <a href="/" class="logo">
           idea<span class="bold">sync</span>
         </a>
         <h2>Create an account</h2>
       </div>
 
-      <form id="register-form" class="auth-form">
+      <form id="register-form" class="auth-form" method="POST" action="{{ url_for('register') }}">
         <div class="form-group">
           <label for="name">Full Name</label>
           <input 
-            id="name"
+            id="name" 
+            name="name"
             type="text" 
             placeholder="Full Name" 
             required 
@@ -32,7 +32,8 @@
         <div class="form-group">
           <label for="email">Email</label>
           <input 
-            id="email"
+            id="email" 
+            name="email"
             type="email" 
             placeholder="Email" 
             required 
@@ -40,9 +41,10 @@
         </div>
         
         <div class="form-group">
-          <label for="reg-username">Username</label>
+          <label for="username">Username</label>
           <input 
-            id="reg-username"
+            id="username" 
+            name="username"
             type="text" 
             placeholder="Username" 
             required 
@@ -51,7 +53,7 @@
         
         <div class="form-group">
           <label for="role">Role</label>
-          <select id="role" required>
+          <select id="role" name="role" required>
             <option value="" disabled selected>Select Role</option>
             <option value="Founder">Founder</option>
             <option value="Investor">Investor</option>
@@ -59,9 +61,10 @@
         </div>
         
         <div class="form-group">
-          <label for="reg-password">Password</label>
+          <label for="password">Password</label>
           <input 
-            id="reg-password"
+            id="password" 
+            name="password"
             type="password" 
             placeholder="Password" 
             required 
@@ -97,22 +100,8 @@
     const urlParams = new URLSearchParams(window.location.search);
     const role = urlParams.get('role');
     if (role && (role === 'Founder' || role === 'Investor')) {
-      const roleSelect = document.getElementById('role');
-      roleSelect.value = role;
+      document.getElementById('role').value = role;
     }
-
-    document.getElementById('register-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      // Show success toast
-      const toast = document.getElementById('toast');
-      toast.classList.add('show');
-      
-      // Navigate to dashboard after a short delay
-      setTimeout(() => {
-        window.location.href = '/dashboard';
-      }, 1000);
-    });
   </script>
 </body>
 </html>

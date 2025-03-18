@@ -1,22 +1,23 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import psycopg2
 from werkzeug.security import generate_password_hash, check_password_hash
+import os
 
 app = Flask(__name__)
-app.secret_key = "your_secret_key"
+app.secret_key = "your_secret_key"  # Keep this secure
 
-# Database connection
-conn = psycopg2.connect(
-    dbname="IdeaSynch",
-    user="postgres",
-    password="Kallan",
-    host="localhost"
-)
+# Database connection function
+def get_db_connection():
+    return psycopg2.connect(
+        dbname="IdeaSynch",
+        user="postgres",
+        password="Kallan",
+        host="localhost"
+    )
 
 @app.route('/')
 def landing():
     return render_template('landing.html')
-
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -24,60 +25,105 @@ def login():
         username = request.form['username']
         password = request.form['password']
 
+        conn = get_db_connection()
         cur = conn.cursor()
         cur.execute("SELECT * FROM users WHERE username = %s", (username,))
         user = cur.fetchone()
         cur.close()
+        conn.close()
 
-        if user and check_password_hash(user[4], password):
+        if not user:
+            print(f"Login failed: No user found for username '{username}'")  # Debugging
+            return jsonify({"error": "Invalid username or password"}), 401
+
+        stored_hash = user[4]  # Assuming password is stored in the 5th column
+
+        print(f"Stored Hash: {stored_hash}")  # Debugging
+        print(f"Entered Password: {password}")  # Debugging
+
+        if check_password_hash(stored_hash, password):
             session['user_id'] = user[0]
-            return redirect(url_for('dashboard'))
+            print(f"Login successful for user: {username}")  # Debugging
+            return jsonify({"redirect": url_for('dashboard')})
         else:
-            return "Invalid username or password", 401  # Error if login fails
+            print(f"Password mismatch for user: {username}")  # Debugging
+            return jsonify({"error": "Invalid username or password"}), 401
 
-    return render_template('login.html')  # Show login page
+    return render_template('login.html')
+
+
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        name = request.form['name']
-        email = request.form['email']
-        username = request.form['username']
-        role = request.form['role']
-        password = generate_password_hash(request.form['password'])
+        name = request.form.get('name')  
+        email = request.form.get('email')  
+        username = request.form.get('username')  
+        role = request.form.get('role')  
+        password = request.form.get('password')  
 
-        cur = conn.cursor()
-        cur.execute(
-            "INSERT INTO users (name, email, username, role, password) VALUES (%s, %s, %s, %s, %s)",
-            (name, email, username, role, password)
-        )
-        conn.commit()
-        cur.close()
+        if not (name and email and username and role and password):
+            return jsonify({"error": "All fields are required"}), 400
 
-        return redirect(url_for('login'))  # Redirect to login after successful registration
+        hashed_password = generate_password_hash(password)  # Hash the password
+
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute(
+                "INSERT INTO users (name, email, username, role, password) VALUES (%s, %s, %s, %s, %s)",
+                (name, email, username, role, hashed_password)
+            )
+            conn.commit()
+            cur.close()
+            conn.close()
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500  # Return error if DB insert fails
+
+        return redirect(url_for('login'))  # ✅ Redirect to login page instead of dashboard
 
     return render_template('register.html')
+
 
 @app.route('/dashboard')
 def dashboard():
     if 'user_id' not in session:
+        print("❌ Debug: User not in session")
         return redirect(url_for('login'))
 
     user_id = session['user_id']
-    
+    print(f"🔍 Debug: Logged-in User ID: {user_id}")
+
+    conn = get_db_connection()
     cur = conn.cursor()
+    
+    # Fetch user details
     cur.execute("SELECT name, role FROM users WHERE id = %s", (user_id,))
     user = cur.fetchone()
+    
+    if not user:
+        print("❌ Debug: User not found in database")
+        cur.close()
+        conn.close()
+        return redirect(url_for("login"))
+
     role = user[1]
-    
-    # Fetch student startups
-    cur.execute("SELECT id, startup_name, description, funding_goal, current_funding, sector, founder_info FROM startups")
+    print(f"✅ Debug: User Found - Name: {user[0]}, Role: {role}")
+
+    # Fetch startups data
+    cur.execute("SELECT id, startup_name, description, funding_goal, COALESCE(current_funding, 0), sector, founder_info FROM startups")
     startups = cur.fetchall()
+
     cur.close()
-    
+    conn.close()
+
+    print(f"📊 Debug: {len(startups)} startups found")
+
     if role == 'Founder':
         return render_template('founder_dashboard.html', user=user, startups=startups)
     else:
+        print("❌ Debug: Access Denied (User is not a Founder)")
         return "Access Denied", 403
 
 
@@ -99,6 +145,7 @@ def list_startup():
     founder_info = request.form['founder_info']
     existing_funding = request.form.get('existing_funding', 0)
 
+    conn = get_db_connection()
     cur = conn.cursor()
     cur.execute(
         "INSERT INTO startups (startup_name, description, funding_goal, sector, founder_info, existing_funding, founder_id) VALUES (%s, %s, %s, %s, %s, %s, %s)",
@@ -106,6 +153,7 @@ def list_startup():
     )
     conn.commit()
     cur.close()
+    conn.close()
 
     return redirect(url_for('dashboard'))
 
@@ -116,15 +164,22 @@ def user():
 
     user_id = session['user_id']
 
+    conn = get_db_connection()
     cur = conn.cursor()
     cur.execute("SELECT name, email, username FROM users WHERE id = %s", (user_id,))
     user_details = cur.fetchone()
-    
-    # Fetch existing startups by the user
+
+    if not user_details:
+        cur.close()
+        conn.close()
+        return redirect(url_for("login"))
+
+    # Fetch startups owned by the user
     cur.execute("SELECT id, startup_name, description FROM startups WHERE founder_info = %s", (user_details[0],))
     startups = cur.fetchall()
-    
+
     cur.close()
+    conn.close()
     return render_template('user.html', user=user_details, startups=startups)
 
 @app.route('/list_company', methods=['POST'])
@@ -133,6 +188,7 @@ def list_company():
         return jsonify({"message": "Unauthorized"}), 401
 
     data = request.json
+    conn = get_db_connection()
     cur = conn.cursor()
     cur.execute("""
         INSERT INTO startups (startup_name, description, sector, funding_goal, founder_info, education, current_funding) 
@@ -142,9 +198,8 @@ def list_company():
     
     conn.commit()
     cur.close()
+    conn.close()
     return jsonify({"message": "Company listed successfully"})
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,74 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Founder Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='founder_dashboard.css') }}">
-    <script defer src="{{ url_for('static', filename='founder_dashboard.js') }}"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - IdeaSync</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='founder_dashboard.css') }}">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-icons/dist/umd/lucide.min.css">
 </head>
-<body>
-
+<body class="dashboard-body">
+  <div class="dashboard-container">
     <!-- Sidebar -->
-    <nav class="sidebar">
-        <button id="toggle-sidebar">➤</button>
-        <ul>
-            <li><a href="{{ url_for('dashboard') }}">Home</a></li>
-            <li><a href="{{ url_for('user') }}" id="user-tab">User</a></li>
-            <li><a href="{{ url_for('logout') }}">Logout</a></li>
-        </ul>
-    </nav>
+    <aside class="sidebar">
+      <h2 class="sidebar-logo">IdeaSync</h2>
+      <nav class="sidebar-menu">
+        <a href="/dashboard" class="sidebar-link active">
+          <i class="icon-home"></i>
+          <span>Home</span>
+        </a>
+        <a href="/user" class="sidebar-link">
+          <i class="icon-user"></i>
+          <span>User</span>
+        </a>
+        <button id="logout-btn" class="sidebar-link sidebar-button">
+          <i class="icon-logout"></i>
+          <span>Logout</span>
+        </button>
+      </nav>
+    </aside>
 
     <!-- Main Content -->
-    <div class="main-content">
-        <h1>Welcome, {{ user[0] }}!</h1>
+    <main class="dashboard-main">
+      <div class="dashboard-header">
+        <h1 class="dashboard-title">Welcome, Founder!</h1>
+        <button id="list-company-btn" class="btn btn-primary">List a Company</button>
+      </div>
 
-        <!-- List Startups -->
-        <section class="startup-list">
-            {% for startup in startups %}
+      <!-- Dynamic Startup Cards -->
+      <section class="startup-grid">
+        {% for startup in startups %}
             <div class="startup-card">
-                <h2>{{ startup[1] }}</h2>
-                <p>{{ startup[2] }}</p>
-                <p><strong>Funding Goal:</strong> ${{ startup[3] }}</p>
-                <p><strong>Current Funding:</strong> ${{ startup[4] }}</p>
-                <button class="more-details" data-id="{{ startup[0] }}">More Details</button>
-                <button class="connect">Connect</button>
+                <h2 class="startup-name">{{ startup[1] }}</h2>  <!-- Company Name -->
+                <p class="startup-desc">{{ startup[2] }}</p>  <!-- Description -->
+                <p class="startup-info"><strong>Sector:</strong> {{ startup[3] }}</p>  <!-- Sector -->
+                <p class="startup-info"><strong>Funding Goal:</strong> ${{ "{:,.2f}".format(startup[4]) }}</p>  <!-- Funding Goal -->
+                <p class="startup-info"><strong>Current Funding:</strong> $
+                  {{ "{:,.2f}".format(startup[5] if startup[5] is not none else 0) }}
+                </p>  <!-- Current Funding -->
+                <div class="startup-actions">
+                    <button class="btn btn-primary btn-small details-btn">More Details</button>
+                    <button class="btn btn-outline btn-small connect-btn">Connect</button>
+                </div>
             </div>
-            {% endfor %}
-        </section>
-    </div>
+        {% else %}
+            <p>No startups listed yet.</p>
+        {% endfor %}
+      </section>
+    </main>
+  </div>
 
-    <!-- Company Listing Popup -->
-    <div id="company-popup" class="popup">
-        <div class="popup-content">
-            <span class="close-btn">&times;</span>
-            <h2>List Your Company</h2>
-            <form id="company-form">
-                <label>Company Name:</label>
-                <input type="text" id="company-name" required>
-                
-                <label>Description:</label>
-                <textarea id="company-description" required></textarea>
-
-                <label>Sector:</label>
-                <input type="text" id="company-sector" required>
-
-                <label>Funding Required ($):</label>
-                <input type="number" id="funding-required" required>
-
-                <label>Founder Details:</label>
-                <textarea id="founder-details" required></textarea>
-
-                <label>Education/Credentials:</label>
-                <textarea id="education" required></textarea>
-
-                <label>Existing Funding Acquired (if any):</label>
-                <input type="number" id="existing-funding">
-
-                <button type="submit">List Company</button>
-            </form>
+  <!-- Company Listing Modal -->
+  <div id="company-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">List Your Company</h2>
+        <button class="modal-close">&times;</button>
+      </div>
+      <form id="company-form" class="modal-form" method="POST" action="{{ url_for('list_company') }}">
+        <div class="form-group">
+          <label for="company-name">Company Name</label>
+          <input id="company-name" name="company_name" type="text" required />
         </div>
-    </div>
 
+        <div class="form-group">
+          <label for="company-description">Description</label>
+          <textarea id="company-description" name="description" required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="company-sector">Sector</label>
+          <input id="company-sector" name="sector" type="text" required />
+        </div>
+
+        <div class="form-group">
+          <label for="funding-required">Funding Goal ($)</label>
+          <input id="funding-required" name="funding_goal" type="number" required />
+        </div>
+
+        <div class="form-group">
+          <label for="founder-details">Founder Details</label>
+          <textarea id="founder-details" name="founder_details" required></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary">List Company</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">
+    <div class="toast-content">
+      <p class="toast-title">Success</p>
+      <p class="toast-message">Operation completed successfully.</p>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script src="{{ url_for('static', filename='founder_dashboard.js') }}"></script>
 </body>
 </html>
